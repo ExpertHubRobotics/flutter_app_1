@@ -1,40 +1,17 @@
+# Check out https://docs.codemagic.io/getting-started/building-a-native-ios-app/ for more information
+# Please review and update values in curly braces
+
 workflows:
-    ios-workflow:
-        name: ios_workflow
+    ios-app:
+        name: iOS App
         environment:
             vars:
-                XCODE_WORKSPACE: "YOUR_WORKSPACE_NAME.xcworkspace"  # PUT YOUR WORKSPACE NAME HERE
-                XCODE_SCHEME: "YOUR_SCHEME_NAME" # PUT THE NAME OF YOUR SCHEME HERE
+                XCODE_WORKSPACE: "{{Expert_restaurant}}"
+                XCODE_SCHEME: "{{Restaurant}}"
             xcode: latest
             cocoapods: default
-        triggering:
-            events:
-                - push
-            branch_patterns:
-                - pattern: master
-                  include: true
-                  source: true
         scripts:
-            - name: Set up keychain to be used for codesigning using Codemagic CLI 'keychain' command
-              script: keychain initialize
-            - name: Set up Provisioning profiles from environment variables
-              script: |
-                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-                  mkdir -p "$PROFILES_HOME"
-                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
-                  echo ${FCI_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-                  echo "Saved provisioning profile $PROFILE_PATH"
-            - name: Increment build number
-              script: agvtool new-version -all $(($BUILD_NUMBER +1))
-            - name: Set up code signing settings on Xcode project
-              script: xcode-project use-profiles
-            - name: Build ipa for distribution
-              script: xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+            - xcodebuild build -workspace "$XCODE_WORKSPACE.xcworkspace" -scheme "$XCODE_SCHEME" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
         artifacts:
-            - build/ios/ipa/*.ipa
-            - /tmp/xcodebuild_logs/*.log
+            - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
             - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-        publishing:
-            app_store_connect:
-                apple_id: expertmitri1@gmail.com  # PUT YOUR APPLE ID HERE
-                password: Encrypted(...) # PUT YOUR APP-SPECIFIC-PASSWORD HERE https://support.apple.com/en-us/HT204397
