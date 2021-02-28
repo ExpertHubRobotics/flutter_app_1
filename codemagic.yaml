@@ -6,8 +6,8 @@ workflows:
         name: iOS App
         environment:
             vars:
-                XCODE_WORKSPACE: "Expert_restaurant.xcworkspace"
-                XCODE_SCHEME: "Restaurant"
+                XCODE_WORKSPACE: "{{ Expert_restaurant }}"
+                XCODE_SCHEME: "{{ Restaurant }}"
             xcode: latest
             cocoapods: default
         scripts:
